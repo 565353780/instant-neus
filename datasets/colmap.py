@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 
 import torch
+import trimesh
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, IterableDataset
 import torchvision.transforms.functional as TF
@@ -12,7 +13,7 @@ import pytorch_lightning as pl
 
 import datasets
 from datasets.colmap_utils import \
-    read_cameras_binary, read_images_binary, read_points3d_binary
+    read_cameras_binary, read_cameras_text, read_images_binary, read_images_text, read_points3d_binary
 from models.ray_utils import get_ray_directions
 from utils.misc import get_rank
 
@@ -140,7 +141,7 @@ class ColmapDatasetBase():
         self.rank = get_rank()
 
         if not ColmapDatasetBase.initialized:
-            camdata = read_cameras_binary(os.path.join(self.config.root_dir, 'sparse/0/cameras.bin'))
+            camdata = read_cameras_text(os.path.join(self.config.root_dir, 'sparse/0/cameras.txt'))
 
             H = int(camdata[1].height)
             W = int(camdata[1].width)
@@ -170,7 +171,7 @@ class ColmapDatasetBase():
             
             directions = get_ray_directions(w, h, fx, fy, cx, cy).to(self.rank)
 
-            imdata = read_images_binary(os.path.join(self.config.root_dir, 'sparse/0/images.bin'))
+            imdata = read_images_text(os.path.join(self.config.root_dir, 'sparse/0/images.txt'))
 
             mask_dir = os.path.join(self.config.root_dir, 'masks')
             has_mask = os.path.exists(mask_dir) # TODO: support partial masks
@@ -201,11 +202,11 @@ class ColmapDatasetBase():
                         mask = torch.ones_like(img[...,0], device=img.device)
                     all_fg_masks.append(mask) # (h, w)
                     all_images.append(img)
-            
-            all_c2w = torch.stack(all_c2w, dim=0)   
 
-            pts3d = read_points3d_binary(os.path.join(self.config.root_dir, 'sparse/0/points3D.bin'))
-            pts3d = torch.from_numpy(np.array([pts3d[k].xyz for k in pts3d])).float()
+            all_c2w = torch.stack(all_c2w, dim=0)
+
+            mesh = trimesh.load(os.path.join(self.config.root_dir, 'sparse/0/points3D.ply'))
+            pts3d = torch.from_numpy(mesh.vertices).float()
             all_c2w, pts3d = normalize_poses(all_c2w, pts3d, up_est_method=self.config.up_est_method, center_est_method=self.config.center_est_method)
 
             ColmapDatasetBase.properties = {

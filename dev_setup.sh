@@ -10,7 +10,7 @@ pip install matplotlib opencv-python imageio imageio-ffmpeg \
   scipy PyMCubes pyransac3d torch_efficient_distloss \
   tensorboard
 
-pip install pytorch-lightning <2
+pip install "pytorch-lightning<2"
 pip install omegaconf==2.2.3
 pip install nerfacc==0.3.3
 

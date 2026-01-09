@@ -4,8 +4,8 @@ seed: 42
 
 dataset:
   name: colmap
-  root_dir: ./load/unbounded360/garden
-  img_downscale: 4 # specify training image size by either img_wh or img_downscale
+  root_dir: /home/lichanghao/chLi/Dataset/GS/haizei_1/mv_2d3d_match/colmap
+  img_downscale: 1 # specify training image size by either img_wh or img_downscale
   up_est_method: ground # if true, use estimated ground plane normal direction as up direction
   center_est_method: lookat
   n_test_traj_steps: 120
