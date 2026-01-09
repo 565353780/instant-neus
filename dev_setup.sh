@@ -15,4 +15,5 @@ pip install omegaconf==2.2.3
 pip install nerfacc==0.3.3
 
 cd tiny-cuda-nn/bindings/torch
-python setup.py install
+LIBRARY_PATH=/usr/local/cuda-12.4/targets/x86_64-linux/lib/stubs:$LIBRARY_PATH \
+  python setup.py install
